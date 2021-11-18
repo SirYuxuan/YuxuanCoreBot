@@ -113,6 +113,16 @@ public class Dispenser {
     public static void distribute(GroupMessageEvent event) {
 
 
+        if(event.getMessage().contentToString().contains("有人收") || event.getMessage().contentToString().contains("出点")){
+            String result = "消息来至：《"+event.getGroup().getName()+"》("+event.getGroup().getId()+")\r\n发送人："+event.getSenderName()+"("+event.getSender().getId()+")\r\n"+"消息内容：\r\n";
+            MessageChain messages = MessageUtils.newChain();
+            messages = messages.plus(result).plus(event.getMessage());
+            event.getBot().getGroup(726098712L).sendMessage(messages);
+            return;
+
+        }
+
+
         List<Long> blacklist = new ArrayList<>();
         blacklist.add(352355075L);
 

@@ -23,7 +23,7 @@ public class YuxuanBot {
 
         bot = BotFactory.INSTANCE.newBot(setting.getLong("user"), setting.getStr("pass"), botConfiguration -> {
             botConfiguration.fileBasedDeviceInfo("info" + setting.getLong("user") + ".json");
-            botConfiguration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_WATCH);
+            botConfiguration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PHONE);
         });
 
         // 注册机器人事件
