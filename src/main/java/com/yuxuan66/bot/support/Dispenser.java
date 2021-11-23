@@ -111,10 +111,13 @@ public class Dispenser {
      * @param event 群消息事件
      */
     public static void distribute(GroupMessageEvent event) {
+        if (event.getGroup().getId() == 1007805049L) {
+            return;
+        }
 
 
-        if(event.getMessage().contentToString().contains("有人收") || event.getMessage().contentToString().contains("出点")){
-            String result = "消息来至：《"+event.getGroup().getName()+"》("+event.getGroup().getId()+")\r\n发送人："+event.getSenderName()+"("+event.getSender().getId()+")\r\n"+"消息内容：\r\n";
+        if (event.getMessage().contentToString().contains("有人收") || event.getMessage().contentToString().contains("出点")) {
+            String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
             MessageChain messages = MessageUtils.newChain();
             messages = messages.plus(result).plus(event.getMessage());
             event.getBot().getGroup(726098712L).sendMessage(messages);
@@ -122,10 +125,18 @@ public class Dispenser {
 
         }
 
+        if (event.getGroup().getId() == 617939467 || event.getMessage().contentToString().startsWith("YXTEST::")) {
+            String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
+            MessageChain messages = MessageUtils.newChain();
+            messages = messages.plus(result).plus(event.getMessage());
+            event.getBot().getGroup(797215188L).sendMessage(messages);
+            event.getBot().getGroup(143477610L).sendMessage(messages);
+            return;
+        }
+
 
         List<Long> blacklist = new ArrayList<>();
         blacklist.add(352355075L);
-
 
 
         BotMessage botMessage = new BotMessage();
@@ -163,10 +174,10 @@ public class Dispenser {
                     messageChain = messageChain.plus(AtAll.INSTANCE);
                 } else if (botMessageData.getType() == BotMsgType.IMG) {
                     byte[] bytes = HttpUtil.downloadBytes(botMessageData.getMsg());
-                    if(new String(bytes, Charset.defaultCharset()).contains("code")){
+                    if (new String(bytes, Charset.defaultCharset()).contains("code")) {
                         JSONObject jsonObject = JSON.parseObject(new String(bytes, Charset.defaultCharset()));
                         messageChain = messageChain.plus(jsonObject.get("msg").toString());
-                    }else{
+                    } else {
                         Image image = event.getGroup().uploadImage(ExternalResource.create(bytes));
                         messageChain = messageChain.plus(image);
                     }
@@ -189,6 +200,106 @@ public class Dispenser {
      */
     public static void distribute(FriendMessageEvent event) {
 
+
+        if (event.getMessage().contentToString().startsWith("混沌Push")) {
+            MessageChain messages = MessageUtils.newChain();
+            if (event.getMessage().contentToString().startsWith("混沌Push@")) {
+                messages = messages.plus(AtAll.INSTANCE);
+            }
+            for (SingleMessage item : event.getMessage()) {
+                if (item.contentToString().startsWith("混沌Push@")) {
+                    messages = messages.plus(item.contentToString().replace("混沌Push@", " "));
+                } else if (item.contentToString().startsWith("混沌Push")) {
+                    messages = messages.plus(item.contentToString().replace("混沌Push", " "));
+                } else {
+                    if (!(item instanceof Image)) {
+                        messages = messages.plus(item);
+                    } else {
+                        messages = messages.plus("【图片】");
+                    }
+
+                }
+
+            }
+            // 工具人群
+            List<Long> bL = new ArrayList<>();
+            // 群发白名单
+            bL.add(1718018032L);
+            bL.add(303968745L);
+            bL.add(642884652L);
+            bL.add(437310811L);
+            bL.add(2998461262L);
+            if (bL.contains(event.getSender().getId())) {
+                event.getBot().getGroup(822397335L).sendMessage(messages);
+                // 市场群
+                event.getBot().getGroup(985570381L).sendMessage(messages);
+                // 大群
+                event.getBot().getGroup(1007805049L).sendMessage(messages);
+                System.out.println(event.getSender().getId());
+                if (Convert.toInt(event.getSender().getId()) == 1718018032) {
+                    // 鱼老板
+                    event.getBot().getGroup(224563313L).sendMessage(messages);
+                    // LSP
+                    event.getBot().getGroup(143477610L).sendMessage(messages);
+                } else {
+                    // 季节群
+                    event.getBot().getGroup(797215188L).sendMessage(messages);
+                }
+            }
+            return;
+        }
+
+
+        List<Long> blacklist = new ArrayList<>();
+        blacklist.add(352355075L);
+
+
+        BotMessage botMessage = new BotMessage();
+        botMessage.setQq(event.getSender().getId());
+        botMessage.setMessageDataList(messageConvert(event.getMessage()));
+        botMessage.setGroup(0L);
+        String body = "";
+        try {
+            body = HttpUtil.post(URL, JSON.toJSONString(botMessage));
+        } catch (Exception e) {
+        }
+
+
+        JSONObject data = JSONObject.parseObject(body);
+
+        if (data.containsKey("data")) {
+            JSONObject apiResultInfo = data.getJSONObject("data");
+
+            if (apiResultInfo == null) {
+                return;
+            }
+
+            List<BotMessageData> messageDataList = apiResultInfo.getJSONArray("messageDataList").toJavaList(BotMessageData.class);
+
+            MessageChain messageChain = MessageUtils.newChain();
+
+            // 构建消息链子
+            for (BotMessageData botMessageData : messageDataList) {
+                if (botMessageData.getType() == BotMsgType.TEXT) {
+                    messageChain = messageChain.plus(botMessageData.getMsg());
+                } else if (botMessageData.getType() == BotMsgType.IMG) {
+                    byte[] bytes = HttpUtil.downloadBytes(botMessageData.getMsg());
+                    if (new String(bytes, Charset.defaultCharset()).contains("code")) {
+                        JSONObject jsonObject = JSON.parseObject(new String(bytes, Charset.defaultCharset()));
+                        messageChain = messageChain.plus(jsonObject.get("msg").toString());
+                    } else {
+                        Image image = event.getSender().uploadImage(ExternalResource.create(bytes));
+                        messageChain = messageChain.plus(image);
+                    }
+
+                }
+            }
+
+            event.getSender().sendMessage(messageChain);
+
+        }
+
+
     }
 
     /**
@@ -197,7 +308,54 @@ public class Dispenser {
      * @param event 临时消息事件
      */
     public static void distribute(GroupTempMessageEvent event) {
+        List<Long> blacklist = new ArrayList<>();
+        blacklist.add(352355075L);
 
+
+        BotMessage botMessage = new BotMessage();
+        botMessage.setQq(event.getSender().getId());
+        botMessage.setMessageDataList(messageConvert(event.getMessage()));
+
+        String body = "";
+        try {
+            body = HttpUtil.post(URL, JSON.toJSONString(botMessage));
+        } catch (Exception e) {
+        }
+
+
+        JSONObject data = JSONObject.parseObject(body);
+
+        if (data.containsKey("data")) {
+            JSONObject apiResultInfo = data.getJSONObject("data");
+
+            if (apiResultInfo == null) {
+                return;
+            }
+
+            List<BotMessageData> messageDataList = apiResultInfo.getJSONArray("messageDataList").toJavaList(BotMessageData.class);
+
+            MessageChain messageChain = MessageUtils.newChain();
+
+            // 构建消息链子
+            for (BotMessageData botMessageData : messageDataList) {
+                if (botMessageData.getType() == BotMsgType.TEXT) {
+                    messageChain = messageChain.plus(botMessageData.getMsg());
+                } else if (botMessageData.getType() == BotMsgType.IMG) {
+                    byte[] bytes = HttpUtil.downloadBytes(botMessageData.getMsg());
+                    if (new String(bytes, Charset.defaultCharset()).contains("code")) {
+                        JSONObject jsonObject = JSON.parseObject(new String(bytes, Charset.defaultCharset()));
+                        messageChain = messageChain.plus(jsonObject.get("msg").toString());
+                    } else {
+                        Image image = event.getSender().uploadImage(ExternalResource.create(bytes));
+                        messageChain = messageChain.plus(image);
+                    }
+
+                }
+            }
+
+            event.getSender().sendMessage(messageChain);
+
+        }
     }
 
     /**
