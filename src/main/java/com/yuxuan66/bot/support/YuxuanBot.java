@@ -23,16 +23,13 @@ public class YuxuanBot {
 
         bot = BotFactory.INSTANCE.newBot(setting.getLong("user"), setting.getStr("pass"), botConfiguration -> {
             botConfiguration.fileBasedDeviceInfo("info" + setting.getLong("user") + ".json");
-            botConfiguration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PHONE);
+            botConfiguration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_WATCH);
         });
 
         // 注册机器人事件
 
         bot.getEventChannel().subscribeAlways(GroupMessageEvent.class, Dispenser::distribute);
-        bot.getEventChannel().subscribeAlways(FriendMessageEvent.class, Dispenser::distribute);
-        bot.getEventChannel().subscribeAlways(GroupTempMessageEvent.class, Dispenser::distribute);
-        bot.getEventChannel().subscribeAlways(MemberJoinRequestEvent.class, Dispenser::distribute);
-        bot.getEventChannel().subscribeAlways(BotOnlineEvent.class, Dispenser::distribute);
+
     }
 
     public static YuxuanBot getInstance(){
