@@ -29,7 +29,11 @@ import com.yuxuan66.bot.entity.BotMsgType;
 import net.mamoe.mirai.event.events.*;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.ExternalResource;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,6 +117,27 @@ public class Dispenser {
     public static void distribute(GroupMessageEvent event) {
         if (event.getGroup().getId() == 1007805049L) {
             return;
+        }
+
+        if(event.getMessage().contentToString().toUpperCase().equals("PAP")){
+            if(event.getSender().getId() == 1718018032){
+                Connection connection = Jsoup.connect("https://seat.winterco.org/character/view/paps/2117284154");
+                connection.cookie("remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d","eyJpdiI6InAydzNHZnJuSTFYWndnb3RpMG93WlE9PSIsInZhbHVlIjoiSDYyVTBpM2ZvVkpDeFhndm5yTEUwM3Fua0ptOFlDZUZpS1NSRW9FZlhUZDFKeVhrZ2FHTkJ5Y1BzT1JhNmtidEwwdGhuTDdEa2ZIR0xZNFl0ZDd4RWhncENCN1BQblpQTlwvNHZXcU4zcE9VPSIsIm1hYyI6IjU2OGM1Yzg0MjJkYWQ1YWVhMmMzNjZhNTY2ODFiODZiNDg5MDEyNGI3MDIyZmEzOTJmOWUzNGE4YTAzNmJmNjIifQ%3D%3D; XSRF-TOKEN=eyJpdiI6IlV0Yys4RTNTV2UranRGUnBQUEZmT1E9PSIsInZhbHVlIjoiQVhEVFwvV3VuNFRWZGpkQmh0bGRhaURVNDRnRlpCTlJtZWM2Z0F0Vjh2TlUrUGJDODdXMUM3SW1sclRqTlZoQW0iLCJtYWMiOiJlMmMxODUyMWUyY2ViOTBiZWY2ZmNjNDRmYWQ0MjIxOWU2NGM1OGQxYjlkM2Y2NzhiMTIzNmE1YjE4OTM4NTQ2In0%3D");
+                connection.cookie("laravel_session","eyJpdiI6InAydzNHZnJuSTFYWndnb3RpMG93WlE9PSIsInZhbHVlIjoiSDYyVTBpM2ZvVkpDeFhndm5yTEUwM3Fua0ptOFlDZUZpS1NSRW9FZlhUZDFKeVhrZ2FHTkJ5Y1BzT1JhNmtidEwwdGhuTDdEa2ZIR0xZNFl0ZDd4RWhncENCN1BQblpQTlwvNHZXcU4zcE9VPSIsIm1hYyI6IjU2OGM1Yzg0MjJkYWQ1YWVhMmMzNjZhNTY2ODFiODZiNDg5MDEyNGI3MDIyZmEzOTJmOWUzNGE4YTAzNmJmNjIifQ%3D%3D; XSRF-TOKEN=eyJpdiI6IlV0Yys4RTNTV2UranRGUnBQUEZmT1E9PSIsInZhbHVlIjoiQVhEVFwvV3VuNFRWZGpkQmh0bGRhaURVNDRnRlpCTlJtZWM2Z0F0Vjh2TlUrUGJDODdXMUM3SW1sclRqTlZoQW0iLCJtYWMiOiJlMmMxODUyMWUyY2ViOTBiZWY2ZmNjNDRmYWQ0MjIxOWU2NGM1OGQxYjlkM2Y2NzhiMTIzNmE1YjE4OTM4NTQ2In0%3D");
+                Document document = null;
+                try {
+                    document = connection.get();
+                    String text = document.getElementsByClass("panel-body").get(1).getElementsByTag("h4").get(0).text();
+                    event.getGroup().sendMessage(new At(event.getSender().getId()).plus(" " + "您本月的PAP为：" + text.replace("My Participations in this corporation this month: ","")));
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }else{
+                event.getGroup().sendMessage(new At(event.getSender().getId()).plus(" " + "您暂未开通此功能"));
+                return;
+            }
         }
 
 
