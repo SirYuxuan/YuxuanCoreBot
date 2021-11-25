@@ -50,7 +50,7 @@ public class Dispenser {
      */
     public static void distribute(GroupMessageEvent event) {
 
-        if (event.getGroup().getId() == 617939467) {
+        if (event.getGroup().getId() == 155057693 || event.getMessage().contentToString().startsWith("YXTEST::")) {
             String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
             MessageChain messages = MessageUtils.newChain();
             messages = messages.plus(result).plus(event.getMessage());
