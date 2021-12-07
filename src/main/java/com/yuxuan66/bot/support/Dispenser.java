@@ -20,12 +20,16 @@ package com.yuxuan66.bot.support;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yuxuan66.bot.entity.BotMessage;
 import com.yuxuan66.bot.entity.BotMessageData;
 import com.yuxuan66.bot.entity.BotMsgType;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.event.events.*;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.ExternalResource;
@@ -50,7 +54,7 @@ public class Dispenser {
 
     // 军团的QQ群
     static {
-        checkGroups.add(822397335L);
+
         checkGroups.add(797215188L);
     }
 
@@ -115,31 +119,9 @@ public class Dispenser {
      * @param event 群消息事件
      */
     public static void distribute(GroupMessageEvent event) {
-        if (event.getGroup().getId() == 1007805049L) {
+        if (event.getGroup().getId() == 1007805049L || event.getGroup().getId() == 822397335L) {
             return;
         }
-
-        if(event.getMessage().contentToString().toUpperCase().equals("PAP")){
-            if(event.getSender().getId() == 1718018032){
-                Connection connection = Jsoup.connect("https://seat.winterco.org/character/view/paps/2117284154");
-                connection.cookie("remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d","eyJpdiI6InAydzNHZnJuSTFYWndnb3RpMG93WlE9PSIsInZhbHVlIjoiSDYyVTBpM2ZvVkpDeFhndm5yTEUwM3Fua0ptOFlDZUZpS1NSRW9FZlhUZDFKeVhrZ2FHTkJ5Y1BzT1JhNmtidEwwdGhuTDdEa2ZIR0xZNFl0ZDd4RWhncENCN1BQblpQTlwvNHZXcU4zcE9VPSIsIm1hYyI6IjU2OGM1Yzg0MjJkYWQ1YWVhMmMzNjZhNTY2ODFiODZiNDg5MDEyNGI3MDIyZmEzOTJmOWUzNGE4YTAzNmJmNjIifQ%3D%3D; XSRF-TOKEN=eyJpdiI6IlV0Yys4RTNTV2UranRGUnBQUEZmT1E9PSIsInZhbHVlIjoiQVhEVFwvV3VuNFRWZGpkQmh0bGRhaURVNDRnRlpCTlJtZWM2Z0F0Vjh2TlUrUGJDODdXMUM3SW1sclRqTlZoQW0iLCJtYWMiOiJlMmMxODUyMWUyY2ViOTBiZWY2ZmNjNDRmYWQ0MjIxOWU2NGM1OGQxYjlkM2Y2NzhiMTIzNmE1YjE4OTM4NTQ2In0%3D");
-                connection.cookie("laravel_session","eyJpdiI6InAydzNHZnJuSTFYWndnb3RpMG93WlE9PSIsInZhbHVlIjoiSDYyVTBpM2ZvVkpDeFhndm5yTEUwM3Fua0ptOFlDZUZpS1NSRW9FZlhUZDFKeVhrZ2FHTkJ5Y1BzT1JhNmtidEwwdGhuTDdEa2ZIR0xZNFl0ZDd4RWhncENCN1BQblpQTlwvNHZXcU4zcE9VPSIsIm1hYyI6IjU2OGM1Yzg0MjJkYWQ1YWVhMmMzNjZhNTY2ODFiODZiNDg5MDEyNGI3MDIyZmEzOTJmOWUzNGE4YTAzNmJmNjIifQ%3D%3D; XSRF-TOKEN=eyJpdiI6IlV0Yys4RTNTV2UranRGUnBQUEZmT1E9PSIsInZhbHVlIjoiQVhEVFwvV3VuNFRWZGpkQmh0bGRhaURVNDRnRlpCTlJtZWM2Z0F0Vjh2TlUrUGJDODdXMUM3SW1sclRqTlZoQW0iLCJtYWMiOiJlMmMxODUyMWUyY2ViOTBiZWY2ZmNjNDRmYWQ0MjIxOWU2NGM1OGQxYjlkM2Y2NzhiMTIzNmE1YjE4OTM4NTQ2In0%3D");
-                Document document = null;
-                try {
-                    document = connection.get();
-                    String text = document.getElementsByClass("panel-body").get(1).getElementsByTag("h4").get(0).text();
-                    event.getGroup().sendMessage(new At(event.getSender().getId()).plus(" " + "您本月的PAP为：" + text.replace("My Participations in this corporation this month: ","")));
-                    return;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }else{
-                event.getGroup().sendMessage(new At(event.getSender().getId()).plus(" " + "您暂未开通此功能"));
-                return;
-            }
-        }
-
 
         if (event.getMessage().contentToString().contains("有人收") || event.getMessage().contentToString().contains("出点")) {
             String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
@@ -148,15 +130,6 @@ public class Dispenser {
             event.getBot().getGroup(726098712L).sendMessage(messages);
             return;
 
-        }
-
-        if (event.getGroup().getId() == 617939467 || event.getMessage().contentToString().startsWith("YXTEST::")) {
-            String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
-            MessageChain messages = MessageUtils.newChain();
-            messages = messages.plus(result).plus(event.getMessage());
-            event.getBot().getGroup(797215188L).sendMessage(messages);
-            event.getBot().getGroup(143477610L).sendMessage(messages);
-            return;
         }
 
 
@@ -228,12 +201,10 @@ public class Dispenser {
 
         if (event.getMessage().contentToString().startsWith("混沌Push")) {
             MessageChain messages = MessageUtils.newChain();
-            if (event.getMessage().contentToString().startsWith("混沌Push@")) {
-                messages = messages.plus(AtAll.INSTANCE);
-            }
+
             for (SingleMessage item : event.getMessage()) {
                 if (item.contentToString().startsWith("混沌Push@")) {
-                    messages = messages.plus(item.contentToString().replace("混沌Push@", " "));
+                    messages = messages.plus(AtAll.INSTANCE).plus(item.contentToString().replace("混沌Push@", " "));
                 } else if (item.contentToString().startsWith("混沌Push")) {
                     messages = messages.plus(item.contentToString().replace("混沌Push", " "));
                 } else {
@@ -414,12 +385,36 @@ public class Dispenser {
     public static void distribute(BotOnlineEvent event) {
         synchronized (lock) {
             if (!isStartCheck) {
-              /*  CronUtil.setMatchSecond(true);
+                System.out.println("定时器已启动");
+                System.out.println("开始获取军团QQ");
+                List<String> allQQ = JSON.parseObject(HttpUtil.get("http://115.29.203.165:10002/corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
+                System.out.println("军团QQ获取完毕：" + allQQ.size()+"人");
+                for (Long checkGroup : checkGroups) {
+                    Group group = event.getBot().getGroup(checkGroup);
+                    assert group != null;
+
+                    for (NormalMember member : group.getMembers()) {
+                        if (!allQQ.contains(Convert.toStr(member.getId()))) {
+                            // 踢掉此成员
+                            try {
+                                Thread.sleep(10000);
+                            } catch (InterruptedException e) {
+                            }
+                            try{
+                                member.kick("对不起，您已经离开军团，或军团系统授权失效，请在user.hd-eve.com完成注册并绑定QQ",false);
+                            }catch (Exception e){
+                                System.out.println("踢人失败，QQ:" + member.getId() +"====>" + e.getMessage());
+                            }
+                        }
+                    }
+                }
+                CronUtil.setMatchSecond(true);
                 CronUtil.schedule("0 0/30 0/1 * * ?", new Task() {
                     @Override
                     public void execute() {
-                        List<String> allQQ = JSON.parseObject(HttpUtil.get(BASE_URL + "corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
-
+                        System.out.println("开始获取军团QQ");
+                        List<String> allQQ = JSON.parseObject(HttpUtil.get("http://115.29.203.165:10002/corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
+                        System.out.println("军团QQ获取完毕：" + allQQ.size()+"人");
                         for (Long checkGroup : checkGroups) {
                             Group group = event.getBot().getGroup(checkGroup);
                             assert group != null;
@@ -427,14 +422,18 @@ public class Dispenser {
                             for (NormalMember member : group.getMembers()) {
                                 if (!allQQ.contains(Convert.toStr(member.getId()))) {
                                     // 踢掉此成员
-                                    member.kick("对不起，您已经离开军团，或军团系统授权失效，请联系管理或重新授权系统后加入");
+                                    try{
+                                        member.kick("对不起，您已经离开军团，或军团系统授权失效，请在user.hd-eve.com完成注册并绑定QQ");
+                                    }catch (Exception e){
+                                        System.out.println("踢人失败，QQ:" + member.getId() +"====>" + e.getMessage());
+                                    }
                                 }
                             }
                         }
                     }
                 });
                 CronUtil.start();
-                isStartCheck = true;*/
+                isStartCheck = true;
 
             }
         }
