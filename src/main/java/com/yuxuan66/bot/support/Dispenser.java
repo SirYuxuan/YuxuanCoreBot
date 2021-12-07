@@ -20,12 +20,16 @@ package com.yuxuan66.bot.support;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yuxuan66.bot.entity.BotMessage;
 import com.yuxuan66.bot.entity.BotMessageData;
 import com.yuxuan66.bot.entity.BotMsgType;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.event.events.*;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.ExternalResource;
@@ -43,27 +47,42 @@ import java.util.List;
 public class Dispenser {
 
 
-    /**
-     * 群消息
-     *
-     * @param event 群消息事件
-     */
-    public static void distribute(GroupMessageEvent event) {
+    private static Object lock = new Object();
+    private static  Boolean isStartCheck = false;
+    private static List<Long> checkGroups = new ArrayList<>();
 
-        if (event.getGroup().getId() == 155057693 || event.getMessage().contentToString().startsWith("YXTEST::")) {
-            String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
-            MessageChain messages = MessageUtils.newChain();
-            messages = messages.plus(result).plus(event.getMessage());
-            event.getBot().getGroup(797215188L).sendMessage(messages);
-            event.getBot().getGroup(143477610L).sendMessage(messages);
-            return;
-        }
-
-
-
-
+    static {
+        checkGroups.add(797215188L);
     }
 
+    public static void distribute(BotOnlineEvent event) {
+        synchronized (lock) {
+            if (!isStartCheck) {
+                System.out.println("定时器已启动");
+                System.out.println("开始获取军团QQ");
+                List<String> allQQ = JSON.parseObject(HttpUtil.get("http://115.29.203.165:10002/corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
+                System.out.println("军团QQ获取完毕：" + allQQ.size()+"人");
+                List<Long> re = new ArrayList<>();
+                for (Long checkGroup : checkGroups) {
+                    Group group = event.getBot().getGroup(checkGroup);
+                    assert group != null;
+
+                    for (NormalMember member : group.getMembers()) {
+                        if (!allQQ.contains(Convert.toStr(member.getId()))) {
+                            // 踢掉此成员
+                          re.add(member.getId());
+                        }
+                    }
+                }
+                System.out.println(JSON.toJSONString(re));
+                CronUtil.setMatchSecond(true);
+                CronUtil.start();
+                isStartCheck = true;
+
+            }
+        }
+
+    }
 
 
 }

@@ -27,8 +27,7 @@ public class YuxuanBot {
         });
 
         // 注册机器人事件
-
-        bot.getEventChannel().subscribeAlways(GroupMessageEvent.class, Dispenser::distribute);
+        bot.getEventChannel().subscribeAlways(BotOnlineEvent.class, Dispenser::distribute);
 
     }
 
