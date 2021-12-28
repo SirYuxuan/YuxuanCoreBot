@@ -19,6 +19,9 @@
 package com.yuxuan66.bot.support;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
@@ -39,8 +42,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 机器人消息分发器
@@ -127,7 +129,7 @@ public class Dispenser {
             String result = "消息来至：《" + event.getGroup().getName() + "》(" + event.getGroup().getId() + ")\r\n发送人：" + event.getSenderName() + "(" + event.getSender().getId() + ")\r\n" + "消息内容：\r\n";
             MessageChain messages = MessageUtils.newChain();
             messages = messages.plus(result).plus(event.getMessage());
-            event.getBot().getGroup(726098712L).sendMessage(messages);
+            Objects.requireNonNull(event.getBot().getGroup(726098712L)).sendMessage(messages);
             return;
 
         }
@@ -342,7 +344,7 @@ public class Dispenser {
                         JSONObject jsonObject = JSON.parseObject(new String(bytes, Charset.defaultCharset()));
                         messageChain = messageChain.plus(jsonObject.get("msg").toString());
                     } else {
-                        Image image = event.getSender().uploadImage(ExternalResource.create(bytes));
+                        Image image = event.getBot().getGroup(event.getGroup().getId()).uploadImage(ExternalResource.create(bytes));
                         messageChain = messageChain.plus(image);
                     }
 
@@ -360,9 +362,11 @@ public class Dispenser {
      * @param event 申请加群消息事件
      */
     public static void distribute(MemberJoinRequestEvent event) {
-
+        List<Long> checkGroups111 = new ArrayList<>();
+        checkGroups111.addAll(checkGroups);
+        checkGroups111.add(822397335L);
         // 指定群在进行校验
-        if (checkGroups.contains(event.getGroupId())) {
+        if (checkGroups111.contains(event.getGroupId())) {
             JSONObject data = JSON.parseObject(HttpUtil.get(BASE_URL + "corp/checkQQDoesItExist/" + event.getFromId()));
             boolean isExist = data.getBoolean("data");
             if (isExist) {
@@ -388,7 +392,7 @@ public class Dispenser {
                 System.out.println("定时器已启动");
                 System.out.println("开始获取军团QQ");
                 List<String> allQQ = JSON.parseObject(HttpUtil.get("http://115.29.203.165:10002/corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
-                System.out.println("军团QQ获取完毕：" + allQQ.size()+"人");
+                System.out.println("军团QQ获取完毕：" + allQQ.size() + "人");
                 for (Long checkGroup : checkGroups) {
                     Group group = event.getBot().getGroup(checkGroup);
                     assert group != null;
@@ -396,14 +400,12 @@ public class Dispenser {
                     for (NormalMember member : group.getMembers()) {
                         if (!allQQ.contains(Convert.toStr(member.getId()))) {
                             // 踢掉此成员
+
                             try {
                                 Thread.sleep(10000);
-                            } catch (InterruptedException e) {
-                            }
-                            try{
-                                member.kick("对不起，您已经离开军团，或军团系统授权失效，请在user.hd-eve.com完成注册并绑定QQ",false);
-                            }catch (Exception e){
-                                System.out.println("踢人失败，QQ:" + member.getId() +"====>" + e.getMessage());
+                                member.kick("对不起，您已经离开军团，或军团系统授权失效，请在user.hd-eve.com完成注册并绑定QQ", false);
+                            } catch (Exception e) {
+                                System.out.println("踢人失败，QQ:" + member.getId() + "====>" + e.getMessage());
                             }
                         }
                     }
@@ -414,7 +416,7 @@ public class Dispenser {
                     public void execute() {
                         System.out.println("开始获取军团QQ");
                         List<String> allQQ = JSON.parseObject(HttpUtil.get("http://115.29.203.165:10002/corp/getAllQQ")).getJSONArray("data").toJavaList(String.class);
-                        System.out.println("军团QQ获取完毕：" + allQQ.size()+"人");
+                        System.out.println("军团QQ获取完毕：" + allQQ.size() + "人");
                         for (Long checkGroup : checkGroups) {
                             Group group = event.getBot().getGroup(checkGroup);
                             assert group != null;
@@ -422,10 +424,11 @@ public class Dispenser {
                             for (NormalMember member : group.getMembers()) {
                                 if (!allQQ.contains(Convert.toStr(member.getId()))) {
                                     // 踢掉此成员
-                                    try{
+                                    try {
+                                        Thread.sleep(10000);
                                         member.kick("对不起，您已经离开军团，或军团系统授权失效，请在user.hd-eve.com完成注册并绑定QQ");
-                                    }catch (Exception e){
-                                        System.out.println("踢人失败，QQ:" + member.getId() +"====>" + e.getMessage());
+                                    } catch (Exception e) {
+                                        System.out.println("踢人失败，QQ:" + member.getId() + "====>" + e.getMessage());
                                     }
                                 }
                             }
